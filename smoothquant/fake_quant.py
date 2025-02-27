@@ -6,10 +6,10 @@ from functools import partial
 @torch.no_grad()
 def quantize_weight_per_channel_absmax(w, n_bits=8):
     # w: (out_features, in_features)
-    scales = w.abs().max(dim=-1, keepdim=True)[0]
-    q_max = 2 ** (n_bits - 1) - 1
-    scales.clamp_(min=1e-5).div_(q_max)
-    w.div_(scales).round_().mul_(scales)
+    scales = w.abs().max(dim=-1, keepdim=True)[0]  # s=w_max (out_features, 1)
+    q_max = 2 ** (n_bits - 1) - 1  # q_max=127 (n_bits=8)
+    scales.clamp_(min=1e-5).div_(q_max)  # s/q_max
+    w.div_(scales).round_().mul_(scales)  # Round(w * q_max / s) * s / q_max - weight after dequantization
     return w
 
 

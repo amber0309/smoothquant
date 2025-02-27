@@ -50,22 +50,23 @@ def smooth_ln_fcs_llama_like(ln, fcs, act_scales, alpha=0.5):
     if not isinstance(fcs, list):
         fcs = [fcs]
     assert isinstance(ln, (LlamaRMSNorm, MistralRMSNorm, MixtralRMSNorm))
-    for fc in fcs:
+    for fc in fcs:  # fc.weight (4096, 4096)
         assert isinstance(fc, nn.Linear)
         assert ln.weight.numel() == fc.in_features == act_scales.numel()
     device, dtype = fcs[0].weight.device, fcs[0].weight.dtype
-    act_scales = act_scales.to(device=device, dtype=dtype)
+    act_scales = act_scales.to(device=device, dtype=dtype)  # (4096)
     weight_scales = torch.cat(
         [fc.weight.abs().max(dim=0, keepdim=True)[0] for fc in fcs], dim=0
-    )
-    weight_scales = weight_scales.max(dim=0)[0].clamp(min=1e-5)
+    )  # (3, 4096) compute the maximum of each matrix for each channel
+    weight_scales = weight_scales.max(dim=0)[0].clamp(min=1e-5)  # (4096) use maximum of QKVs
     scales = (
         (act_scales.pow(alpha) / weight_scales.pow(1 - alpha))
         .clamp(min=1e-5)
         .to(device)
         .to(dtype)
-    )
+    )  # (4096) 
 
+    # eq (3) in paper
     ln.weight.div_(scales)
     for fc in fcs:
         fc.weight.mul_(scales.view(1, -1))
