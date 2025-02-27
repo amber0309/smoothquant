@@ -27,16 +27,24 @@ and achieve faster inference speed with half the number of GPUs compared to FP16
 
 ## Installation
 
+Tested on a single NVIDIA H800
+
 ```bash
 conda create -n smoothquant python=3.8
 conda activate smoothquant
-pip install torch==1.12.1+cu113 torchvision==0.13.1+cu113 torchaudio==0.12.1 --extra-index-url https://download.pytorch.org/whl/cu113
+pip install torch==2.3.0 torchvision==0.18.0 torchaudio==2.3.0 --index-url https://download.pytorch.org/whl/cu121
 pip install transformers==4.36.0 accelerate datasets zstandard
 
 python setup.py install
 ```
 
 ## Usage
+
+Smoothquant of Llama-2-7b model and perplexity evaluation
+
+```python
+python quantize_llama.py
+```
 
 ### SmoothQuant INT8 Inference for PyTorch
 
