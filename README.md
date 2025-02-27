@@ -42,7 +42,7 @@ python setup.py install
 
 Smoothquant of Llama-2-7b model and perplexity evaluation
 
-```python
+```bash
 python quantize_llama.py
 ```
 
